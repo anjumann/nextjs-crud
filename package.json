@@ -1,5 +1,5 @@
 {
-  "name": "nextjs-crud",
+  "name": "nextjs-backend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
-    "@prisma/client": "^5.11.0",
+    "@prisma/client": "^5.15.1",
     "@radix-ui/react-checkbox": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-label": "^2.1.0",
@@ -34,7 +34,6 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "postcss": "^8",
-    "prisma": "^5.11.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

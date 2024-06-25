@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
@@ -16,11 +16,6 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { createUser } from '@/actions/user'
-// import { toast } from '../ui/use-toast'
-import { DialogClose } from '@radix-ui/react-dialog'
-import { LoaderIcon } from 'lucide-react'
-import { useToast } from '../ui/use-toast'
 
 
 const formSchema = z.object({
@@ -36,10 +31,6 @@ const formSchema = z.object({
 
 const CreateUserForm = () => {
 
-    const { toast } = useToast()
-
-    const [loading, setLoading] = useState(false)
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -48,39 +39,9 @@ const CreateUserForm = () => {
         },
     })
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
-        setLoading(true)
-        try {
-            const res = await createUser(values)
-            form.reset({
-                name: "",
-                email: ""
-            })
-            if (res) {
-                toast({
-                    title: "User Created ",
-                })
-            } else {
-                toast({
-                    title: "Something went wrong! ",
-                    variant: "destructive",
-                    duration : 3000
-                })
-
-            }
-
-
-        } catch (error) {
-            toast({
-                title: "Something went wrong! ",
-                variant: "destructive"
-            })
-        }
-        setLoading(false)
-
     }
-
 
     return (
         <div>
@@ -119,12 +80,7 @@ const CreateUserForm = () => {
                             </FormItem>
                         )}
                     />
-                     <div className="flex items-center justify-between">
-                        <DialogClose asChild >
-                            <Button disabled={loading} variant={"outline"} > Cancel</Button>
-                        </DialogClose>
-                        <Button type="submit" disabled={loading} > {loading && <LoaderIcon size="16" className='mr-2 animate-spin' />}Submit</Button>
-                    </div>
+                    <Button type="submit">Submit</Button>
                 </form>
             </Form>
 
