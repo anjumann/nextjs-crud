@@ -13,8 +13,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import CreateUserForm from '@/components/shared/CreateUserForm'
+import { getAllUsers } from '@/actions/user'
 
 const page = async () => {
+
+  const users = await getAllUsers()
 
   return (
     <div className=' h-screen w-10/12 mx-auto p-11  ' >
@@ -44,10 +47,22 @@ const page = async () => {
           All Users
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 ">
-          <UserCard />
-          <UserCard />
-          <UserCard />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 ">
+
+          {
+            users && users?.map((val, idx) => {
+              return (
+                <div className="" key={idx} >
+                  <UserCard val={val} />
+                </div>
+              )
+            })
+          }
+          
+          {
+            users?.length === 0 && <div className=""> No Users Found </div>
+          }
+
         </div>
       </div>
 

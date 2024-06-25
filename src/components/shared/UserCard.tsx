@@ -4,39 +4,162 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Trash2Icon } from "lucide-react"
+import { Trash2, Trash2Icon } from "lucide-react"
+import { createTodoItem, deleteTodoItem, updateToDoItem } from "@/actions/todo"
+import { useToast } from "../ui/use-toast"
+import { deleteUser } from "@/actions/user"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
-export default function Component() {
-
-  const [tasks, setTasks] = useState([
-    { id: 1, text: "Finish project proposal", completed: false },
-    { id: 2, text: "Schedule meeting with client", completed: false },
-    { id: 3, text: "Buy groceries", completed: true },
-  ])
-
-
-  const [newTask, setNewTask] = useState("")
-
-
-  const handleAddTask = () => {
-    if (newTask.trim() !== "") {
-      setTasks([...tasks, { id: tasks.length + 1, text: newTask, completed: false }])
-      setNewTask("")
+export default function UserCard(
+  {
+    val
+  }: {
+    val: {
+      id: string;
+      name: string;
+      email: string;
+      todos: {
+        id: string;
+        title: string;
+        description: string | null;
+        isCompleted: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        userId: string;
+      }[]
     }
   }
+) {
 
-  const handleToggleTask = (id : number ) => {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)))
+  const { id, email, name, todos } = val
+  const { toast } = useToast()
+  const [newTask, setNewTask] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const handleAddTask = async () => {
+    setLoading(true)
+
+    try {
+      if (newTask.trim() !== "") {
+        const data = {
+          title: newTask,
+          userId: id
+        }
+        const todo = await createTodoItem(data)
+        if (todo) {
+          toast({
+            title: "Todo added"
+          })
+        }
+        setNewTask("")
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
+    setLoading(false)
+  }
+  const handleToggleTask = async (id: string, isCompleted: boolean) => {
+    setLoading(true)
+    try {
+      await updateToDoItem({
+        isCompleted: !isCompleted,
+        id: id
+      })
+    } catch (error) {
+      console.log("error")
+    }
+    setLoading(false)
+
+  }
+  const handleDeleteTask = async (id: string) => {
+    setLoading(true)
+    try {
+      const todo = await deleteTodoItem({
+        id: id
+      })
+
+      if (todo) {
+        toast({
+          title: "Todo deleted"
+        })
+      } else {
+        toast({
+          title: "Something went wrong!!",
+          variant: "destructive"
+        })
+
+      }
+
+    } catch (error) {
+      console.log("error")
+    }
+    setLoading(false)
+
   }
 
-  const handleDeleteTask = (id : number ) => {
-    setTasks(tasks.filter((task) => task.id !== id))
+  const handleDeleteUser = async (id: string) => {
+
+    setLoading(true)
+    try {
+      const todo = await deleteUser(id)
+
+      if (todo) {
+        toast({
+          title: "Todo deleted"
+        })
+      } else {
+        toast({
+          title: "Something went wrong!!",
+          variant: "destructive"
+        })
+
+      }
+
+    } catch (error) {
+      console.log("error")
+    }
+    setLoading(false)
   }
+
 
   return (
     <div className="">
       <div className="bg-background p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-4">Todo List</h1>
+      <div className="flex justify-between items-center mb-2 ">
+          <h1 className="text-2xl font-bold mb-4"> {name} </h1>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant={"outline"} size="icon" > <Trash2 size={"16"} /> </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle> Are you sure ? </DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete user {name}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-4 py-4">
+                <DialogClose asChild >
+                  <Button variant={"destructive"} onClick={() => handleDeleteUser(id)} > Delete </Button>
+                </DialogClose>
+                <DialogClose asChild >
+                  <Button variant={"outline"} > Cancel </Button>
+                </DialogClose>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="flex mb-4">
           <Input
             type="text"
@@ -48,24 +171,23 @@ export default function Component() {
           <Button onClick={handleAddTask}>Add</Button>
         </div>
         <ul className="space-y-2">
-          {tasks.map((task) => (
+          {todos.map((task) => (
             <li
               key={task.id}
-              className={`flex items-center justify-between rounded-md px-4 py-2 transition-colors ${
-                task.completed
+              className={`flex items-center justify-between rounded-md px-4 py-2 transition-colors ${task.isCompleted
                   ? "bg-muted text-muted-foreground line-through"
                   : "bg-background hover:bg-accent hover:text-accent-foreground"
-              }`}
+                }`}
             >
               <div className="flex items-center">
                 <Checkbox
                   id={`task-${task.id}`}
-                  checked={task.completed}
+                  checked={task.isCompleted}
                   className="mr-2"
-                  onCheckedChange={() => handleToggleTask(task.id)}
+                  onCheckedChange={() => handleToggleTask(task.id, task.isCompleted)}
                 />
                 <label htmlFor={`task-${task.id}`} className="text-sm font-medium">
-                  {task.text}
+                  {task.title}
                 </label>
               </div>
               <Button
