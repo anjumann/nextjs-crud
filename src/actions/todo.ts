@@ -88,7 +88,7 @@ export const deleteTodoItem = async (data: { id: string }) => {
     }
   };
   
-  export const getAllTodos = async (data: { userId: string }) => {
+  export const getAllTodos = async () => {
     try {
       const toDos = await client.toDo.findMany();
       return toDos;
